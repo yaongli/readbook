@@ -12,6 +12,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator,InvalidPage,EmptyPage,PageNotAnInteger
 from models import *
+from forms import *
 import time
 
 ITEMS_PER_PAGE = 20
@@ -83,6 +84,17 @@ def authorpage(req, authorid):
     books = Book.objects.filter(author=author)
     bookRows = get_table_rows(books)
     return render_to_response('authorpage.html', {'settings' : settings, 'author' : author, 'bookRows' : bookRows}, context_instance=RequestContext(req))
+
+def importshumilou(req):
+    if req.method == 'POST':
+        form = ImportForm(req.POST)
+        book = form.save(req)
+        if book:
+            return HttpResponseRedirect(reverse('bookindex', args=[book.id]))
+    else:
+        form = ImportForm({"booksite" : u"shumilou"})
+    return render_to_response('import_shumilou.html', {'settings' : settings, 'form' : form}, context_instance=RequestContext(req))
+
 
 
 
