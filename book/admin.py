@@ -67,3 +67,8 @@ class BookShelfAdmin(admin.ModelAdmin):
 admin.site.register(BookShelf, BookShelfAdmin)
 
 admin.site.register(UpdateHistory)
+
+
+#################################
+admin.site.register(ImportInfo)
+

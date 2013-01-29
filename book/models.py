@@ -106,4 +106,17 @@ class BookShelf(models.Model):
 
     def __unicode__(self):
         return 'BookShelf'
-    
+
+class ImportInfo(models.Model):
+    SOURCE_CHOISES = (('QIDIAN', u"起点"),("SHUMILOU", u"书迷楼"), ("ZONGHENG", u"纵横"))
+    catagory = models.ForeignKey(Catagory, editable=True, verbose_name=u"分类", null=True)
+    source = models.CharField(max_length="32",verbose_name=u"Source Site", choices=SOURCE_CHOISES)
+    bookName = models.TextField(editable=True, verbose_name=u"书名")
+    bookAuthor = models.TextField(editable=True, verbose_name=u"作者")
+    booklink = models.TextField(editable=True, verbose_name=u"目录链接")
+    updateTime = models.DateTimeField(auto_now_add=True, verbose_name=u'更新日期')
+    book = models.ForeignKey(Book, blank=True, editable=True, verbose_name=u'书籍', null=True)
+    lastChapter = models.ForeignKey(Chapter, blank=True, editable=True, verbose_name=u'更新章节', null=True)
+
+    def __unicode__(self):
+        return self.bookName

@@ -14,7 +14,8 @@ urlpatterns = patterns('',
     url(r'^book/(?P<bookid>\d+)/(?P<chapterid>\d+)/', 'book.views.bookchapter', name="bookchapter"),
     url(r'^author/(?P<authorid>\d+)/', 'book.views.authorpage', name="authorpage"),
     url(r'^import/shumilou/', 'book.views.importshumilou', name="importshumilou"),
-    url(r'^import/shumilou/do/', 'book.views.doimportshumilou', name="doimportshumilou"),
+    url(r'^import/importlist/', 'book.views.importlist', name="importlist"),
+    url(r'^import/importbook/(?P<importInfoId>\d+)/', 'book.views.importbook', name="importbook"),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

@@ -29,7 +29,7 @@
                     <div class="nav-collapse">
                     <ul class="nav nav-pills">
                         <li class="index {% block index-menu %}{% endblock %}"><a href="/">{% trans '首页' %}</a></li>
-                        <li class="list {% block list-menu %}{% endblock %}"><a href="/list/">{% trans '目录' %}</a></li>
+                        <li class="list {% block list-menu %}{% endblock %}"><a href="/import/importlist/">{% trans '目录' %}</a></li>
                         {% if not user.is_authenticated %}
                         <li class="login {% block login-menu %}{% endblock %}"><a href="/login/">{% trans '登录' %}</a></li>
                         <li class="register {% block register-menu %}{% endblock %}"><a href="/register/">{% trans '注册' %}</a></li>

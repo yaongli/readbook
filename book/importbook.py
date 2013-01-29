@@ -6,6 +6,9 @@ import urllib2
 import re
 import os
 import shutil
+from Queue import Queue
+import threading
+import thread 
 
 class ChapterLink():
     def __init__(self, title, href, update, num):
@@ -35,8 +38,8 @@ def queryChapterLink(bookNum):
     return chapterList
 
 def queryChapterLinkList(bookurl):
-	bookNum = bookurl.replace("http://www.shumilou.com/", "").replace("/", "")
-	return queryChapterLink(bookNum)
+    bookNum = bookurl.replace("http://www.shumilou.com/", "").replace("/", "")
+    return queryChapterLink(bookNum)
 
 def writeChapterLink(bookName, chapters):
     with open(bookName + ".txt", "w") as bookindex:
@@ -97,48 +100,56 @@ def downloadbook(bookName, bookNum):
         except:
             pass
 
+def downloadchapter(book, chapterLink, chapterSequence):
+    chapterName = chapterLink.title
+
+    try:
+        chapter = Chapter.objects.get(name=chapterName)
+        return
+    except Chapter.DoesNotExist:
+        chapterSequence += 1
+        content = queryContent(chapterLink)
+        content = "<br/>".join(content.lines)
+        chapter = Chapter(seq=chapterSequence,
+            name=chapterName,
+            book=book,
+            content=content
+            )
+        chapter.save()
+        try:
+            updateHistory = UpdateHistory(book=book, chapter=chapter)
+            updateHistory.save()
+        except:
+            pass
+
 def importbook(catagoryName, bookName, authorName, bookindex):
-	#
-	try:
-		author = Author.objects.get(name=authorName)
-	except Author.DoesNotExist:
-		author = Author(name=authorName)
-		author.save()
+    #
+    try:
+        author = Author.objects.get(name=authorName)
+    except Author.DoesNotExist:
+        author = Author(name=authorName)
+        author.save()
 
-	try:
-		catagory = Catagory.objects.get(name=catagoryName)
-	except Catagory.DoesNotExist:
-		catagory = Catagory(name=catagoryName)
-		catagory.save()
-	#
-	try:
-		book = Book.objects.get(name=bookName)
-	except Book.DoesNotExist:
-		book = Book(name=bookName, 
-			author=author, 
-			catagory=catagory
-			)
-		book.save()
-	#
-	chapterLinkList = queryChapterLinkList(bookindex)
-	chapterSequence = 0
-	for chapterLink in chapterLinkList:
-		chapterName = chapterLink.title
+    try:
+        catagory = Catagory.objects.get(name=catagoryName)
+    except Catagory.DoesNotExist:
+        catagory = Catagory(name=catagoryName)
+        catagory.save()
+    #
+    try:
+        book = Book.objects.get(name=bookName)
+    except Book.DoesNotExist:
+        book = Book(name=bookName, 
+            author=author, 
+            catagory=catagory
+            )
+        book.save()
+    #
+    chapterLinkList = queryChapterLinkList(bookindex)
+    chapterSequence = 0
+    for chapterLink in chapterLinkList:
+        chapterSequence += 1
+        #downloadchapter(chapterLink)
+        thread.start_new_thread(downloadchapter, (book, chapterLink,chapterSequence))
 
-		try:
-			chapter = Chapter.objects.get(name=chapterName)
-			chapterSequence = chapter.seq + 1
-			continue
-		except Chapter.DoesNotExist:
-			chapterSequence += 1
-			content = queryContent(chapterLink)
-			content = "<br/>".join(content.lines)
-			chapter = Chapter(seq=chapterSequence,
-				name=chapterName,
-				book=book,
-				content=content
-				)
-			chapter.save()
-
-	return book
-
+    return book

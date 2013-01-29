@@ -14,12 +14,13 @@ from django.core.paginator import Paginator,InvalidPage,EmptyPage,PageNotAnInteg
 from models import *
 from forms import *
 import time
+from importbook import importbook as imbook
 
 ITEMS_PER_PAGE = 20
 
-def get_page(objs, page):
+def get_page(objs, page=ITEMS_PER_PAGE):
     paginator = Paginator(objs, ITEMS_PER_PAGE)
-    
+
     try:
         ret = paginator.page(page)
     except (EmptyPage, InvalidPage):
@@ -57,7 +58,7 @@ def bookindex(req, bookid):
     bookid = int(bookid)
     print "bookid", bookid
     thebook = Book.objects.get(id=bookid)
-    chapters = Chapter.objects.filter(book=bookid)
+    chapters = Chapter.objects.filter(book=bookid).order_by('seq')
     chapterRows = get_table_rows(chapters)
     
     return render_to_response('bookindex.html', {'settings' : settings, 'thebook': thebook, 'chapters' : chapters, 'chapterRows' : chapterRows}, context_instance=RequestContext(req))
@@ -94,6 +95,24 @@ def importshumilou(req):
     else:
         form = ImportForm({"booksite" : u"shumilou"})
     return render_to_response('import_shumilou.html', {'settings' : settings, 'form' : form}, context_instance=RequestContext(req))
+
+def importlist(req):
+    importinfolist = get_page(ImportInfo.objects.order_by('-updateTime'), ITEMS_PER_PAGE)
+    return render_to_response('importinfo.html', {'settings' : settings, 'importinfolist' : importinfolist}, context_instance=RequestContext(req))
+
+def importbook(req, importInfoId):
+    importInfo = ImportInfo.objects.get(id=importInfoId)
+    siteSource = importInfo.source
+    if siteSource == "SHUMILOU":
+        book = imbook(importInfo.catagory, importInfo.bookName, importInfo.bookAuthor, importInfo.booklink)
+        if importInfo.book == None:
+            importInfo.book = book
+            importInfo.save()
+        return HttpResponseRedirect(reverse('bookindex', args=[book.id]))
+    else:
+        return HttpResponseRedirect(reverse('importlist'))
+
+
 
 
 
